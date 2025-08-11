@@ -1,12 +1,13 @@
 from rest_framework import viewsets, status, permissions,mixins
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 
-from .models import Farmer, FarmProduct, Cart, CartItem, Discount, Order,User,Recipe
+from .models import Farmer, FarmProduct, Cart, CartItem, Discount, Order, Review,User,Recipe
 from .serializers import (
     CartSerializer, CartItemAddSerializer, FarmProductSerializer, FarmProductSimpleSerializer,
     OrderCreateSerializer, OrderDetailSerializer, FarmerSerializer,
-    DiscountSerializer, OrderSerializer, RecipeSerializer, UserSerializer
+    DiscountSerializer, OrderSerializer, RecipeSerializer, ReviewSerializer, UserSerializer
 )
 
 class UserCreateViewSet(mixins.CreateModelMixin,viewsets.GenericViewSet):
@@ -111,3 +112,30 @@ class RecipeViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.AllowAny]
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer()
+
+    @action(detail=True, methods=['patch'])
+    def increase_like(self, request, pk=None):
+        review = self.get_object()
+        serializer = self.get_serializer_class(data=request.data)
+        if serializer.is_valid():
+            review.likes += 1
+            review.save()
+            return Response({'status': 'like updated'},status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['patch'])   
+    def increase_dislike(self, request, pk=None):
+        review = self.get_object()
+        serializer = self.get_serializer_class(data=request.data)
+        if serializer.is_valid():
+            review.dislikes += 1
+            review.save()
+            return Response({'status': 'dislike updated'},status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)  
