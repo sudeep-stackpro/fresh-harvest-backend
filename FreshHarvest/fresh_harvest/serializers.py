@@ -6,22 +6,22 @@ from .models import (
 )
 
 
-class RegisterSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'name', 'email_or_phone', 'password']
+        fields = ['id', 'name', 'email_or_phone', 'location', 'image', 'password']
 
     def create(self, validated_data):
-        user = User(
-            name=validated_data['name'],
-            email_or_phone=validated_data['email_or_phone'],
-            username=validated_data['email_or_phone'] 
-        )
-        user.set_password(validated_data['password']) 
+        password = validated_data.pop('password', None)
+        user = User(**validated_data)
+        if password:
+            user.set_password(password)
         user.save()
         return user
+
+    
 
 class UserLoginSerializer(serializers.Serializer):
     email_or_phone = serializers.CharField()
