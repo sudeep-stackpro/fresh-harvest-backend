@@ -120,7 +120,6 @@ class FarmProductSerializer(serializers.ModelSerializer):
             'id', 'farm', 'product',
             'quantity', 'price', 'label', 'harvest_date',
             'images','reviews'
-            ''
         ]
 
 class FarmProductSimpleSerializer(serializers.ModelSerializer):

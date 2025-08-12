@@ -38,7 +38,7 @@ class CartItemViewSet(viewsets.ModelViewSet):
         farm_product = get_object_or_404(FarmProduct, id=serializer.validated_data['farm_product_id'])
         quantity = serializer.validated_data['quantity']
 
-        cart_item, _ = CartItem.objects.get_or_create(cart=cart, product=farm_product,quantity=quantity)
+        cart_item, _ = CartItem.objects.get_or_create(cart=cart, product=farm_product)
         cart_item.quantity = quantity
         cart_item.save()
         return Response({"message": "Item added to cart successfully"}, status=status.HTTP_201_CREATED)
@@ -116,12 +116,11 @@ class RecipeViewSet(viewsets.ReadOnlyModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
-    serializer_class = ReviewSerializer()
+    serializer_class = ReviewSerializer
 
     @action(detail=True, methods=['patch'])
     def increase_like(self, request, pk=None):
         review = self.get_object()
-        serializer = self.get_serializer_class(data=request.data)
         if serializer.is_valid():
             review.likes += 1
             review.save()
@@ -129,13 +128,13 @@ class ReviewViewSet(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=['patch'])   
+    @action(detail=True, methods=['patch'])
     def increase_dislike(self, request, pk=None):
         review = self.get_object()
-        serializer = self.get_serializer_class(data=request.data)
         if serializer.is_valid():
             review.dislikes += 1
             review.save()
             return Response({'status': 'dislike updated'},status=status.HTTP_202_ACCEPTED)
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)  
+        
